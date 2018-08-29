@@ -1,0 +1,11 @@
+*~
+*#
+.#*
+.*.sw*
+.DS_Store
+__pycache__/
+.idea
+out.wav
+data
+test.jpg
+.python-version

@@ -1,0 +1,7 @@
+# summer-intern-2018-blockchain-raspberry
+サマーインターン2018ブロックチェーン回のRaspberryPIで動かすスクリプトを管理
+
+## Sample
+
+APIへのリクエストや用意したデバイス、モジュールを利用するためのサンプルコードをsample/下に配置しています。  
+使い方や必要パッケージ等は各pythonスクリプトのヘルプもしくは設置階層のREADMEを参照してください
