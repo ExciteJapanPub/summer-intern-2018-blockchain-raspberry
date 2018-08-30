@@ -32,11 +32,13 @@ SPIが有効になっているか確認
 $ lsmod | grep spi
 >spi_bcm2835        16384  0
 ```
-※なっていない場合は /boot/config.txt を編集して再起動
+※なっていない場合はraspi-configで設定を変更
 ```
-$ sudo vi /boot/config.txt
-dtparam=spi=on
+$ sudo raspi-config
 ```
+5 INterfacing Option > P4 SPI  
+の順に選択してEnabledに設定を変更する
+
 ### 回路
 配線例は./image/analog_sensor0X.jpgを参照
 使用したいアナログセンサは配線例のブレッドボードのf-j側に配置（わかりやすくするため）
