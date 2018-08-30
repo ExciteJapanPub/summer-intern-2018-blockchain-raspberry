@@ -69,3 +69,6 @@ sudo apt install open-jtalk open-jtalk-mecab-naist-jdic hts-voice-nitech-jp-atr5
 
 などから.htsvoice形式のボイスモデルファイルをダウンロードし、  
 /data/hts-voice下に置いておく  
+
+こだわりがなければ、/usr/share/hts-voice/下に男性のボイスモデルを置いているので、  
+そちらを利用しても良い
