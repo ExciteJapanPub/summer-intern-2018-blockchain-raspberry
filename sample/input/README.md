@@ -42,6 +42,8 @@ dtparam=spi=on
 使用したいアナログセンサは配線例のブレッドボードのf-j側に配置（わかりやすくするため）
 基本的には、アナログ出力値をADコンバータのピンに繋ぎ、プログラム側で該当のチャネルを指定してデータを取り出す。
 
+ADコンバータとRaspberryPiのピンの対応は、コンバータの型番に差異はあるがこちらのサイトが参考になる
+https://sites.google.com/site/memorandumjavaandalgorithm/raspberry-pi-jiang-zuo12-adkonbata-mcp3208
 
 # USB
 
