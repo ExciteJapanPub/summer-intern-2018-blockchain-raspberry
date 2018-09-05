@@ -45,10 +45,11 @@ if __name__ == "__main__":
 
     max_count = 5000
 
-    path = ""
+    password = ""
+    flag = False
 
     with AnalogSensorReader() as asr:
-        for i in range(max_count):
+        while True:
             # Read the module sensor data
             x_level = asr.read_row_data_for_channel(x_channel)
             y_level = asr.read_row_data_for_channel(y_channel)
@@ -56,11 +57,6 @@ if __name__ == "__main__":
             x_volts = asr.convert_volts(x_level, 2)
             y_volts = asr.convert_volts(y_level, 2)
             sw_volts = asr.convert_volts(sw_level, 2)
-
-            #print(f"-------------------- loop: {i} ------------------------")
-            #print(f"x: {x_level} ({x_volts}V)")
-            #print(f"y: {y_level} ({y_volts}V)")
-            #print(f"SW: {sw_level} ({sw_volts}V)")
 
             x = x_level
             y = y_level
@@ -76,17 +72,16 @@ if __name__ == "__main__":
                 continue
 
             lineSeg1 = -1025
-            flag = 0
 
             #上左 or 下右のどれか
             if y + x + lineSeg1 < 0:
-                flag = 0
+                flag = False
 
             if y + x + lineSeg1 >= 0:
-                flag = 1
+                flag = True
 
             #上or左　又は　下or右
-            if flag == 0:
+            if flag == False:
                 if y - x >= 0:
                     command = "left"
                 else:
@@ -97,13 +92,13 @@ if __name__ == "__main__":
                 else:
                     command = "down"
 
-            #ハッシュ化
-            #print("sha516:", hashlib.sha512(command.encode("utf-8")).hexdigest() )
-            path += command
+
+            password = += command
             print(command)
 
             time.sleep(delay)
 
-
+        #ハッシュ化
+        
 
 
