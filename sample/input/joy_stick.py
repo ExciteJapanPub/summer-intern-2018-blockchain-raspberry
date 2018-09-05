@@ -41,12 +41,15 @@ if __name__ == "__main__":
     sw_channel = 2
 
     # Define delay between readings
-    delay = 1
+    delay = 0.3
 
-    max_count = 50
+    max_count = 5000
+
+    password = ""
+    flag = False
 
     with AnalogSensorReader() as asr:
-        for i in range(max_count):
+        while True:
             # Read the module sensor data
             x_level = asr.read_row_data_for_channel(x_channel)
             y_level = asr.read_row_data_for_channel(y_channel)
@@ -55,13 +58,47 @@ if __name__ == "__main__":
             y_volts = asr.convert_volts(y_level, 2)
             sw_volts = asr.convert_volts(sw_level, 2)
 
-            print(f"-------------------- loop: {i} ------------------------")
-            print(f"x: {x_level} ({x_volts}V)")
-            print(f"y: {y_level} ({y_volts}V)")
-            print(f"SW: {sw_level} ({sw_volts}V)")
+            x = x_level
+            y = y_level
+
+            #入力終了は中心を押しこむ
+            if sw_level == 1:
+                print(path)
+                break
+
+            #ジョイスティックの初期位置はコマンドとして認識させない 上下左右に押し込んだ時だけコマンド取得
+            if 800 < x < 850 and 750 < y < 800 :
+                time.sleep(delay)
+                continue
+
+            lineSeg1 = -1025
+
+            #上左 or 下右のどれか
+            if y + x + lineSeg1 < 0:
+                flag = False
+
+            if y + x + lineSeg1 >= 0:
+                flag = True
+
+            #上or左　又は　下or右
+            if flag == False:
+                if y - x >= 0:
+                    command = "left"
+                else:
+                    command = "up"
+            else:
+                if y - x < 0:  
+                    command = "right"
+                else:
+                    command = "down"
+
+
+            password += command
+            print(command)
 
             time.sleep(delay)
 
-
+        #ハッシュ化
+        
 
 
