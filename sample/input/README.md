@@ -100,3 +100,4 @@ $ lsusb
 ```
 $ sudo sh -c 'echo SUBSYSTEM==\"usb\", ACTION==\"add\", ATTRS{idVendor}==\"XXXX\", ATTRS{idProduct}==\"YYYY\", GROUP=\"plugdev\" >> /etc/udev/rules.d/nfcdev.rules'
 ```
+command input
