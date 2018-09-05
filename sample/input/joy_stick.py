@@ -93,7 +93,7 @@ if __name__ == "__main__":
                     command = "down"
 
 
-            password = += command
+            password += command
             print(command)
 
             time.sleep(delay)
