@@ -4,6 +4,47 @@ import requests
 import sys
 import hashlib
 from docopt import docopt
+import RPi.GPIO as GPIO
+
+GPIO_POS = 5
+
+SCALE_2_HERTZ = {
+    'C_low': 220.0,
+    'D': 246.9,
+    'E': 277.2,
+    'F': 293.7,
+    'G': 329.6,
+    'A': 370.0,
+    'B': 415.3,
+    'C_high': 440.0
+}
+
+
+class Buzzer:
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(GPIO_POS, GPIO.OUT)
+        self.pwm = GPIO.PWM(GPIO_POS, 1000)
+
+    def __del__(self):
+        GPIO.cleanup()
+
+    def change_frequency(self, freq):
+        self.pwm.ChangeFrequency(freq)
+
+    def change_scale(self, scale='C_low'):
+        if scale not in SCALE_2_HERTZ:
+            return
+
+        freq = SCALE_2_HERTZ[scale]
+        self.pwm.ChangeFrequency(freq)
+
+    def play(self, duty):
+        self.pwm.start(duty)
+
+    def stop(self):
+        self.pwm.stop()
+
 
 
 __doc__ = """{f}
@@ -110,6 +151,7 @@ if __name__ == "__main__":
             x = x_level
             y = y_level
 
+            print(sw_level)
             #入力終了は中心を押しこむ
             if sw_level == 1:
                 print(password)
@@ -149,13 +191,38 @@ if __name__ == "__main__":
 
     #ハッシュ化
     hashString = hashlib.md5(password.encode("utf-8")).hexdigest()
+
+    #新規登録（POST：ID+Password）＞ 登録された状態とする　（今回は省略）
+    #扉を開けるかどうかの判断を仰ぐ（GET：Password）＞ 
     #postで送信
+    #chaincode = 'kawaya'
+    #function_name = 'putUser'
+    #args = 'ID01,' + hashString
+    #res = requester.invoke(chaincode, function_name, args)
+
+    #GEtで送信
     chaincode = 'kawaya'
-    function_name = 'putUser'
-    args = 'ID01,' + hashString
+    function_name = 'getUser'
+    #ここはHash値にする
+    args = 'password'
 
     requester = APIRequest()
+    res = requester.query(chaincode, function_name, args)
 
-    res = requester.invoke(chaincode, function_name, args)
     print(res)
+
+    print(res['user'])
+
+    buz = Buzzer()
+    chocho = ['G', 'C_low', 'E', 'F', 'E', 'D', 'C', 'D', 'E', 'A', 'G', 'G', 'C_high']
+
+    #for scale in chocho:
+    #    buz.change_scale(scale)
+
+    #    buz.play(50)
+    #    time.sleep(1)
+
+    #    buz.stop()
+    #    time.sleep(0.25)
+
     sys.exit(0)
