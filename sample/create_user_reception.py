@@ -122,127 +122,136 @@ if __name__ == "__main__":
     # Define delay between readings
     delay = 0.3
 
-    password = ""
-
-    flag = False
-    #コマンド入力は発生したかどうか
-    commandInput = False
-    #IDとパスワードを入力するかどうか
-    registerFlag = False
-
-    with AnalogSensorReader() as asr:
-        while True:
-            # Read the module sensor data
-            x_level = asr.read_row_data_for_channel(x_channel)
-            y_level = asr.read_row_data_for_channel(y_channel)
-            sw_level = asr.read_row_data_for_channel(sw_channel)
-            x_volts = asr.convert_volts(x_level, 2)
-            y_volts = asr.convert_volts(y_level, 2)
-            sw_volts = asr.convert_volts(sw_level, 2)
-
-            x = x_level
-            y = y_level
-
-            #入力終了は中心を押しこむ
-            #新しいパスワードを入力してユーザ登録する時は最初に中心を押し込んだ後にコマンドを入力する
-            if sw_level == 1:
-                if commandInput == False:
-                    print("register")
-                    registerFlag = True
-                    continue
-                print(password)
-                break
-
-            #ジョイスティックの初期位置はコマンドとして認識させない 上下左右に押し込んだ時だけコマンド取得
-            if 600 < x < 890 and 700 < y < 870 :
-                time.sleep(delay)
-                continue
-
-            lineSeg1 = -1025
-
-            #上左 or 下右のどれか
-            if y + x + lineSeg1 < 0:
-                flag = False
-
-            if y + x + lineSeg1 >= 0:
-                flag = True
-
-            #上or左　又は　下or右
-            if flag == False:
-                if y - x >= 0:
-                    command = "left"
-                else:
-                    command = "up"
-            else:
-                if y - x < 0:  
-                    command = "right"
-                else:
-                    command = "down"
-
-            password += command
-            print(command)
-            commandInput = True
-            time.sleep(delay)
-
-    #ハッシュ化
-    hashString = hashlib.md5(password.encode("utf-8")).hexdigest()
-
-    #新規登録（POST：ID+Password）
-    #postで送信
-
-    if registerFlag == True:
-        chaincode = 'kawaya'
-        function_name = 'putUser'
-        args = 'testID01,' + hashString
-        requester = APIRequest()
-        res = requester.invoke(chaincode, function_name, args)
-        #予約した時に残高を減らす
-        chaincode = 'kawaya'
-        function_name = 'getUser'
-        args = hashString
-        requester = APIRequest()
-        res = requester.query(chaincode, function_name, args)
-        balance = res['user']['balance'] - 10
-        #残高に反映
-        function_name = 'updateBalance'
-        args = hashString + ',' + str(balance)
-        requester = APIRequest()
-        res = requester.invoke(chaincode, function_name, args)
-        #予約通知
-        model = 'default'
-        text = "よやくしました　ざんがくは" + str(res['user']['balance']) + "です"
-        talker = Jtalk(model)
-        talker.talk(text)
-        #今回はコマンド入力上からの個室IDの差押えは未実装
-    else:
-        #扉を開けるかどうかの判断を仰ぐ（GET：Password）＞ 
-        #GEtで送信
-        print("confirm")
-        chaincode = 'kawaya'
-        function_name = 'getUser'
-        #ここはHash値にする
-        args = hashString
-        requester = APIRequest()
-        res = requester.query(chaincode, function_name, args)
+    # ひたすら入力を待ち続ける
+    while True:
         
-        #getUserしてきたユーザーのパスワードと一致して入れば解錠（今回は音を鳴らす）
-        print(res['user']['password'])
-        print(res['user']['balance'])
+        password = ""
 
-        if res['user']['password'] == hashString:
-            print("open")
-            #トイレ解錠通知
+        flag = False
+        #コマンド入力は発生したかどうか
+        commandInput = False
+        #IDとパスワードを入力するかどうか
+        registerFlag = False
+
+        with AnalogSensorReader() as asr:
+            while True:
+                # Read the module sensor data
+                x_level = asr.read_row_data_for_channel(x_channel)
+                y_level = asr.read_row_data_for_channel(y_channel)
+                sw_level = asr.read_row_data_for_channel(sw_channel)
+                x_volts = asr.convert_volts(x_level, 2)
+                y_volts = asr.convert_volts(y_level, 2)
+                sw_volts = asr.convert_volts(sw_level, 2)
+
+                x = x_level
+                y = y_level
+
+                #入力終了は中心を押しこむ
+                #新しいパスワードを入力してユーザ登録する時は最初に中心を押し込んだ後にコマンドを入力する
+                if sw_level == 1:
+                    if commandInput == False:
+                        print("register")
+                        registerFlag = True
+                        time.sleep(delay * 2)
+                        continue
+                    print(password)
+                    break
+
+                #ジョイスティックの初期位置はコマンドとして認識させない 上下左右に押し込んだ時だけコマンド取得
+                if 600 < x < 890 and 700 < y < 870 :
+                    time.sleep(delay)
+                    continue
+
+                lineSeg1 = -1025
+
+                #上左 or 下右のどれか
+                if y + x + lineSeg1 < 0:
+                    flag = False
+
+                if y + x + lineSeg1 >= 0:
+                    flag = True
+
+                #上or左　又は　下or右
+                if flag == False:
+                    if y - x >= 0:
+                        command = "left"
+                    else:
+                        command = "up"
+                else:
+                    if y - x < 0:  
+                        command = "right"
+                    else:
+                        command = "down"
+
+                password += command
+                print(command)
+                commandInput = True
+                time.sleep(delay)
+
+        #ハッシュ化
+        hashString = hashlib.md5(password.encode("utf-8")).hexdigest()
+
+        #新規登録（POST：ID+Password）
+        #postで送信
+
+        if registerFlag == True:
+            chaincode = 'kawaya'
+            function_name = 'putUser'
+            args = 'testID01,' + hashString
+            requester = APIRequest()
+            res = requester.invoke(chaincode, function_name, args)
+            #予約した時に残高を減らす
+            chaincode = 'kawaya'
+            function_name = 'getUser'
+            args = hashString
+            requester = APIRequest()
+            res = requester.query(chaincode, function_name, args)
+            balance = res['user']['balance'] - 10
+            #残高に反映
+            function_name = 'updateBalance'
+            args = hashString + ',' + str(balance)
+            requester = APIRequest()
+            res = requester.invoke(chaincode, function_name, args)
+            #予約通知
             model = 'default'
-            text = "といれがひらきました"
-
+            text = "よやくしました　ざんがくは" + str(res['user']['balance']) + "です"
             talker = Jtalk(model)
             talker.talk(text)
-
+            #今回はコマンド入力上からの個室IDの差押えは未実装
         else:
-            print("open false")
+            #扉を開けるかどうかの判断を仰ぐ（GET：Password）＞ 
+            #GEtで送信
+            print("confirm")
+            chaincode = 'kawaya'
+            function_name = 'getUser'
+            #ここはHash値にする
+            args = hashString
+            requester = APIRequest()
+            res = requester.query(chaincode, function_name, args)
+            
+            #getUserしてきたユーザーのパスワードと一致して入れば解錠（今回は音を鳴らす）
+            print(res['user']['password'])
+            print(res['user']['balance'])
 
-        
+            if res['user']['password'] == hashString:
+                print("open")
+                #トイレ解錠通知
+                model = 'default'
+                text = "といれがひらきました"
 
-    print(res)
+                talker = Jtalk(model)
+                talker.talk(text)
+
+            else:
+                #トイレ施錠したまま
+                print("open false")
+                model = 'default'
+                text = "コマンドがまちがっています"
+                talker = Jtalk(model)
+                talker.talk(text)
+            
+        print(res)
+        #トイレ解錠の有無に関わらず次の入力に備えて待つ
+        time.sleep(delay * 10)
 
     sys.exit(0)
