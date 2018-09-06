@@ -136,7 +136,12 @@ if __name__ == "__main__":
     max_count = 5000
 
     password = ""
+
     flag = False
+    #コマンド入力は発生したかどうか
+    commandInput = False
+    #IDとパスワードを入力するかどうか
+    registerFlag = False
 
     with AnalogSensorReader() as asr:
         while True:
@@ -151,14 +156,18 @@ if __name__ == "__main__":
             x = x_level
             y = y_level
 
-            print(sw_level)
             #入力終了は中心を押しこむ
+            #新しいパスワードを入力してユーザ登録する時は最初に中心を押し込んだ後にコマンドを入力する
             if sw_level == 1:
+                if commandInput == False:
+                    print("register")
+                    registerFlag = True
+                    continue
                 print(password)
                 break
 
             #ジョイスティックの初期位置はコマンドとして認識させない 上下左右に押し込んだ時だけコマンド取得
-            if 800 < x < 850 and 750 < y < 800 :
+            if 800 < x < 860 and 750 < y < 810 :
                 time.sleep(delay)
                 continue
 
@@ -183,38 +192,42 @@ if __name__ == "__main__":
                 else:
                     command = "down"
 
-
             password += command
             print(command)
-
+            commandInput = True
             time.sleep(delay)
 
     #ハッシュ化
     hashString = hashlib.md5(password.encode("utf-8")).hexdigest()
 
-    #新規登録（POST：ID+Password）＞ 登録された状態とする　（今回は省略）
-    #扉を開けるかどうかの判断を仰ぐ（GET：Password）＞ 
+    #新規登録（POST：ID+Password）
     #postで送信
-    #chaincode = 'kawaya'
-    #function_name = 'putUser'
-    #args = 'ID01,' + hashString
-    #res = requester.invoke(chaincode, function_name, args)
 
-    #GEtで送信
-    chaincode = 'kawaya'
-    function_name = 'getUser'
-    #ここはHash値にする
-    args = 'password'
-
-    requester = APIRequest()
-    res = requester.query(chaincode, function_name, args)
+    if registerFlag == True:
+        chaincode = 'kawaya'
+        function_name = 'putUser'
+        args = 'ID01,' + hashString
+        requester = APIRequest()
+        res = requester.invoke(chaincode, function_name, args)
+    else:
+        #扉を開けるかどうかの判断を仰ぐ（GET：Password）＞ 
+        #GEtで送信
+        print("confirm")
+        chaincode = 'kawaya'
+        function_name = 'getUser'
+        #ここはHash値にする
+        args = hashString
+        requester = APIRequest()
+        res = requester.query(chaincode, function_name, args)
 
     print(res)
 
-    print(res['user'])
+    
 
-    buz = Buzzer()
-    chocho = ['G', 'C_low', 'E', 'F', 'E', 'D', 'C', 'D', 'E', 'A', 'G', 'G', 'C_high']
+    #print(res['user'])
+
+    #buz = Buzzer()
+    #chocho = ['G', 'C_low']
 
     #for scale in chocho:
     #    buz.change_scale(scale)
