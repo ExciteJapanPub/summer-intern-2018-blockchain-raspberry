@@ -217,23 +217,25 @@ if __name__ == "__main__":
             text = "よやくしました　ざんがくは" + str(res['user']['balance']) + "です"
             talker = Jtalk(model)
             talker.talk(text)
-            #今回はコマンド入力上からの個室IDの差押えは未実装
+            #今回はコマンド入力上からの個室IDの差押えは未実装？
         else:
             #扉を開けるかどうかの判断を仰ぐ（GET：Password）＞ 
             #GEtで送信
             print("confirm")
             chaincode = 'kawaya'
-            function_name = 'getUser'
+            function_name = 'unlock'
             #ここはHash値にする
             args = hashString
             requester = APIRequest()
             res = requester.query(chaincode, function_name, args)
+
+            print(res)
             
             #getUserしてきたユーザーのパスワードと一致して入れば解錠（今回は音を鳴らす）
-            print(res['user']['password'])
-            print(res['user']['balance'])
+            #print(res['user']['password'])
+            #print(res['user']['balance'])
 
-            if res['user']['password'] == hashString:
+            if res['is_unlock'] == True:
                 print("open")
                 #トイレ解錠通知
                 model = 'default'
