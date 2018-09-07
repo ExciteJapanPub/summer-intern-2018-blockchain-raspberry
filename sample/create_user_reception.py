@@ -6,8 +6,11 @@ import hashlib
 from docopt import docopt
 import RPi.GPIO as GPIO
 import subprocess
+from big_arrow import UP,DOWN,RIGHT,LEFT
+
 from os import path
 from docopt import docopt
+
 
 ROOT_DIR = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 
@@ -175,16 +178,20 @@ if __name__ == "__main__":
                 if flag == False:
                     if y - x >= 0:
                         command = "left"
+                        displayText = LEFT
                     else:
                         command = "up"
+                        displayText = UP
                 else:
                     if y - x < 0:  
                         command = "right"
+                        displayText = RIGHT
                     else:
                         command = "down"
+                        displayText = DOWN
 
                 password += command
-                print(command)
+                print(displayText)
                 commandInput = True
                 time.sleep(delay)
 
